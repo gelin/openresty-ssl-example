@@ -16,7 +16,6 @@ local function get_cert_file(server_name)
     return nil
 end
 
-local ngx_io = require "ngx.io"
 local ssl = require "ngx.ssl"
 
 -- caches for keys and certificate chains
@@ -52,13 +51,13 @@ if key == nil or cert == nil then
     -- reading key and certificate file
     ngx.log(ngx.INFO, "loading file ", cert_file)
 
-    local file, err = ngx_io.open(cert_file, "r")
+    local file, err = io.open(cert_file, "r")
     if err ~= nil then
         ngx.log(ngx.ERR, "failed to open file: ", err)
         return ngx.exit(ngx.ERROR)
     end
 
-    local data, err = file:read("*a")
+    local data, err = file:read("*all")
     if err ~= nil then
         ngx.log(ngx.ERR, "failed to read file: ", err)
         return ngx.exit(ngx.ERROR)
