@@ -9,3 +9,7 @@ run:
 .PHONY: test
 test:
 	openssl s_client -showcerts -brief -connect localhost:8443 < /dev/null
+	openssl s_client -showcerts -brief -connect localhost:8443 -servername a.local < /dev/null
+	openssl s_client -showcerts -brief -connect localhost:8443 -servername b.local < /dev/null
+	openssl s_client -showcerts -brief -connect localhost:8443 -servername c.local < /dev/null
+	openssl s_client -showcerts -brief -connect localhost:8443 -servername d.local < /dev/null
