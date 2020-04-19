@@ -8,8 +8,8 @@ run:
 
 .PHONY: test
 test:
-	openssl s_client -brief -connect localhost:8443 < /dev/null 2>&1 | head -1
-	openssl s_client -brief -connect localhost:8443 -servername a.local < /dev/null 2>&1 | head -1
-	openssl s_client -brief -connect localhost:8443 -servername b.local < /dev/null 2>&1 | head -1
-	openssl s_client -brief -connect localhost:8443 -servername c.local < /dev/null 2>&1 | head -1
-	openssl s_client -brief -connect localhost:8443 -servername d.local < /dev/null 2>&1 | head -1
+	echo "GET / HTTP/1.0\r\n" | openssl s_client -brief -connect localhost:8443 2>&1 | head -1
+	echo "GET / HTTP/1.0\r\n" | openssl s_client -brief -connect localhost:8443 -servername a.local 2>&1 | head -1
+	echo "GET / HTTP/1.0\r\n" | openssl s_client -brief -connect localhost:8443 -servername b.local 2>&1 | head -1
+	echo "GET / HTTP/1.0\r\n" | openssl s_client -brief -connect localhost:8443 -servername c.local 2>&1 | head -1
+	echo "GET / HTTP/1.0\r\n" | openssl s_client -brief -connect localhost:8443 -servername d.local 2>&1 | head -1

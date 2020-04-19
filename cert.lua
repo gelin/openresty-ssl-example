@@ -1,17 +1,9 @@
 -- TODO
--- certificate files
-local cert_files = {
-    ["a"] = "/etc/nginx/certs/a.pem",
-    ["b"] = "/etc/nginx/certs/b.pem",
-    ["c"] = "/etc/nginx/certs/c.pem"
-}
-
--- TODO
 -- define logic to get private key and certificate file from the server name here
 local function get_cert_file(server_name)
     local m, err = ngx.re.match(server_name, "([^\\.]+)\\.([^\\.]+)$")
     if m then
-        return cert_files[m[1]]
+        return "/etc/nginx/certs/" .. m[1] .. ".pem"
     end
     return nil
 end
@@ -53,8 +45,8 @@ if key == nil or cert == nil then
 
     local file, err = io.open(cert_file, "r")
     if err ~= nil then
-        ngx.log(ngx.ERR, "failed to open file: ", err)
-        return ngx.exit(ngx.ERROR)
+        ngx.log(ngx.WARN, "failed to open file: ", err)
+        return  -- use default certificate
     end
 
     local data, err = file:read("*all")
@@ -80,6 +72,7 @@ if key == nil or cert == nil then
     if err ~= nil then
         ngx.log(ngx.ERR, "failed to store private key to cache: ", err)
     end
+
     success, err, forcible = certs_cache:set(cert_file, cert)
     if err ~= nil then
         ngx.log(ngx.ERR, "failed to store cert chain to cache: ", err)
