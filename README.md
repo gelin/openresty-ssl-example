@@ -1,5 +1,5 @@
 A small example how to use OpenReady ssl module.
-Based on the official [synopsis](https://github.com/openresty/lua-resty-core/blob/master/lib/ngx/ssl.md).
+Based on the official [synopsis](https://github.com/openresty/lua-resty-core/blob/master/lib/ngx/ssl.md#synopsis).
 
 # Issue
 
@@ -48,15 +48,15 @@ docker run -it --rm -p 8443:443 openresty-ssl-example
 ```console
 $ make test
  
-openssl s_client -brief -connect localhost:8443 < /dev/null 2>&1 | head -1
+echo "GET / HTTP/1.0\r\n" | openssl s_client -brief -connect localhost:8443 2>&1 | head -1
 depth=0 CN = localhost
-openssl s_client -brief -connect localhost:8443 -servername a.local < /dev/null 2>&1 | head -1
+echo "GET / HTTP/1.0\r\n" | openssl s_client -brief -connect localhost:8443 -servername a.local 2>&1 | head -1
 depth=0 CN = a.local
-openssl s_client -brief -connect localhost:8443 -servername b.local < /dev/null 2>&1 | head -1
+echo "GET / HTTP/1.0\r\n" | openssl s_client -brief -connect localhost:8443 -servername b.local 2>&1 | head -1
 depth=0 CN = b.local
-openssl s_client -brief -connect localhost:8443 -servername c.local < /dev/null 2>&1 | head -1
+echo "GET / HTTP/1.0\r\n" | openssl s_client -brief -connect localhost:8443 -servername c.local 2>&1 | head -1
 depth=0 CN = c.local
-openssl s_client -brief -connect localhost:8443 -servername d.local < /dev/null 2>&1 | head -1
+echo "GET / HTTP/1.0\r\n" | openssl s_client -brief -connect localhost:8443 -servername d.local 2>&1 | head -1
 depth=0 CN = localhost
 ```
 
@@ -69,15 +69,17 @@ All these files for each certificate should be stored in a single known director
 [Lua script](cert.lua) has a special function to map SNI server name to the path to the key with certificate file.
 This function should be customized for the real usage. 
 
-If no PEM file is mapped for the domain, or no SNI in the request, a default certificate is used.
+If no PEM file is mapped for the domain, or the file cannot be opened, or no SNI in the request, a default certificate is used.
 The default certificate is defined as usual with `ssl_certificate` and `ssl_certificate_key` directives.
 
-The PEM file is read, the private key and the certificate chain are extracted from the file (in DER format).
-They are stored to in-memory cache to avoid rereading of the file when the same domain is requested next time.
+It's possible to add new PEM files to the directory, they'll be loaded when the corresponding request comes.
+
+The PEM file is read, the private key and the certificate chain are extracted from the file.
+They are stored to in-memory LRU cache to avoid rereading of the file when the same domain is requested next time.
 The cache key is the same as the file name.
 
-The cache for keys and certificates is defined statically in Nginx configuration by [`lua_shared_dict`](https://openresty-reference.readthedocs.io/en/latest/Directives/#lua_shared_dict) directive.
-The size of the caches should be enough to hold all the necessary keys and certificates,
-otherwise the PEM files will be reread on each request.
+The cache for keys and certificates is the [LRU cache](https://github.com/openresty/lua-resty-lrucache).
+The cache is created per each Nginx worker process.
+The sizes of the caches are defined in the Lua script.
 
-The key and certificate chain loaded from the cache of the chosen file are replaced to be used in the current request.
+The key and certificate chain loaded from the cache or the chosen file are used in the current request.
