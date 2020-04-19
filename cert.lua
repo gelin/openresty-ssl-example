@@ -67,12 +67,12 @@ function _M.go()
             return ngx.exit(ngx.ERROR)
         end
 
-        key, err = ssl.priv_key_pem_to_der(data)
+        key, err = ssl.parse_pem_priv_key(data)
         if err ~= nil then
             ngx.log(ngx.ERR, "failed to parse private key: ", err)
             return ngx.exit(ngx.ERROR)
         end
-        cert, err = ssl.cert_pem_to_der(data)
+        cert, err = ssl.parse_pem_cert(data)
         if err ~= nil then
             ngx.log(ngx.ERR, "failed to parse cert chain: ", err)
             return ngx.exit(ngx.ERROR)
@@ -98,14 +98,14 @@ function _M.go()
     end
 
     -- set private key
-    local ok, err = ssl.set_der_priv_key(key)
+    local ok, err = ssl.set_priv_key(key)
     if not ok then
         ngx.log(ngx.ERR, "failed to set private key: ", err)
         return ngx.exit(ngx.ERROR)
     end
 
     -- set certificate chain
-    local ok, err = ssl.set_der_cert(cert)
+    local ok, err = ssl.set_cert(cert)
     if not ok then
         ngx.log(ngx.ERR, "failed to set cert: ", err)
         return ngx.exit(ngx.ERROR)
